@@ -1,0 +1,218 @@
+/* Keyboard */
+#keyboard {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 5px;
+  box-sizing: border-box;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.white-keys {
+  display: inline-flex;
+  height: 100%;
+  position: relative;
+  min-width: min-content;
+}
+
+.black-keys {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.white-key {
+  width: 45px; /* Slightly wider */
+  min-width: 45px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 0 0 4px 4px;
+  position: relative;
+  margin: 0;
+  z-index: 1;
+}
+
+.black-key {
+  width: 30px; /* Slightly wider */
+  position: absolute;
+  height: 60%;
+  background: #333;
+  border: 1px solid #000;
+  border-radius: 0 0 3px 3px;
+  pointer-events: auto;
+  top: 0;
+  margin-left: -15px; /* Half the width */
+  z-index: 3; /* Ensure black keys are above white keys */
+}
+
+.key-label {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10px;
+  pointer-events: none;
+  white-space: pre-line;
+}
+
+.white-key .key-label {
+  color: #333;
+}
+
+.black-key .key-label {
+  color: #fff;
+}
+
+.white-key:hover {
+  background: #f0f0f0;
+}
+
+.black-key:hover {
+  background: #444;
+}
+
+.white-key.active {
+  background: #e7f5ff;
+}
+
+.black-key.active {
+  background: #4a90e2;
+}
+
+/* Position black keys with offsets */
+[data-note$="C#"] {
+  left: 30px;
+}
+[data-note$="D#"] {
+  left: 75px;
+}
+[data-note$="F#"] {
+  left: 165px;
+}
+[data-note$="G#"] {
+  left: 210px;
+}
+[data-note$="A#"] {
+  left: 255px;
+}
+
+/* Repeat for each octave */
+[data-note$="C#3"] {
+  left: 30px;
+}
+[data-note$="D#3"] {
+  left: 75px;
+}
+[data-note$="F#3"] {
+  left: 165px;
+}
+[data-note$="G#3"] {
+  left: 210px;
+}
+[data-note$="A#3"] {
+  left: 255px;
+}
+
+[data-note$="C#4"] {
+  left: 345px;
+}
+[data-note$="D#4"] {
+  left: 390px;
+}
+[data-note$="F#4"] {
+  left: 480px;
+}
+[data-note$="G#4"] {
+  left: 525px;
+}
+[data-note$="A#4"] {
+  left: 570px;
+}
+
+[data-note$="C#5"] {
+  left: 660px;
+}
+[data-note$="D#5"] {
+  left: 705px;
+}
+[data-note$="F#5"] {
+  left: 795px;
+}
+[data-note$="G#5"] {
+  left: 840px;
+}
+[data-note$="A#5"] {
+  left: 885px;
+}
+
+[data-note$="C#6"] {
+  left: 975px;
+}
+[data-note$="D#6"] {
+  left: 1020px;
+}
+[data-note$="F#6"] {
+  left: 1110px;
+}
+[data-note$="G#6"] {
+  left: 1155px;
+}
+[data-note$="A#6"] {
+  left: 1200px;
+}
+
+/* Keyboard binding hint */
+.key-binding {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.white-key .key-binding {
+  color: #666;
+}
+
+.black-key .key-binding {
+  color: #ccc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #keyboard {
+    height: 120px;
+  }
+  .black-key {
+    margin-left: -10px; /* Adjust for smaller screens */
+    width: 20px;
+  }
+  .white-key {
+    width: 35px;
+    min-width: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  #keyboard {
+    height: 100px;
+  }
+  .black-key {
+    margin-left: -8px;
+    width: 16px;
+  }
+  .white-key {
+    width: 30px;
+    min-width: 30px;
+  }
+  .hint {
+    font-size: 0.7em;
+  }
+}
+

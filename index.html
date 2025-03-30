@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JackSynth</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="keyboard.css">
+</head>
+<body>
+  <div id="app">
+    <h1>JackSynth</h1>
+    
+    <!-- Tabs for different sections -->
+    <div class="tabs">
+      <button class="tab-button active" data-tab="synth">Synth</button>
+      <button class="tab-button" data-tab="effects">Effects</button>
+      <button class="tab-button" data-tab="patches">Patches</button>
+      <button class="tab-button" data-tab="drum-machine">Drum Machine</button>
+    </div>
+    
+    <!-- Synth Controls Tab -->
+    <div class="tab-content active" id="synth-tab">
+      <div class="synth-controls">
+        <div class="reset-container">
+          <button id="resetToDefault" class="reset-button">Reset to Default Values</button>
+        </div>
+        <div class="control-group">
+          <label for="waveform1">Oscillator 1 Waveform:</label>
+          <select id="waveform1">
+            <option value="sine" selected>Sine</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+            <option value="triangle">Triangle</option>
+            <option value="fm">FM</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="waveform2">Oscillator 2 Waveform:</label>
+          <select id="waveform2">
+            <option value="sine" selected>Sine</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+            <option value="triangle">Triangle</option>
+            <option value="fm">FM</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="detune">Oscillator 2 Detune (cents):</label>
+          <input type="range" id="detune" min="-100" max="100" step="1" value="0">
+          <span class="value-display">0</span>
+        </div>
+        <div class="control-group">
+          <label for="oscMix">Oscillator Mix (1:2):</label>
+          <input type="range" id="oscMix" min="0" max="1" step="0.01" value="0.5">
+          <span class="value-display">0.5</span>
+        </div>
+
+        <!-- Modulation Matrix -->
+        <div class="control-group">
+          <h3>Modulation Matrix</h3>
+          <label for="modulationSource">Source:</label>
+          <select id="modulationSource">
+            <option value="lfo">LFO</option>
+            <option value="envelope">Envelope</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="modulationTarget">Target:</label>
+          <select id="modulationTarget">
+            <option value="filterCutoff">Filter Cutoff</option>
+            <option value="oscillatorFrequency">Oscillator Frequency</option>
+            <option value="volume">Volume</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="modulationAmount">Amount:</label>
+          <input type="range" id="modulationAmount" min="-100" max="100" step="1" value="0">
+          <span class="value-display">0</span>
+        </div>
+
+        <div class="control-group">
+          <h3>Step Sequencer</h3>
+          <div class="sequencer-grid" id="stepSequencer">
+            <!-- Steps will be generated dynamically -->
+          </div>
+          <select id="sequencerTarget">
+            <option value="pitch">Pitch</option>
+            <option value="filter">Filter</option>
+            <option value="volume">Volume</option>
+          </select>
+          <button id="playSequencer">Play</button>
+        </div>
+
+        <div class="control-group">
+          <h3>Envelope Follower</h3>
+          <label for="envFollowSensitivity">Sensitivity:</label>
+          <input type="range" id="envFollowSensitivity" min="0" max="1" step="0.01" value="0.5">
+          <span class="value-display">0.5</span>
+          <select id="envFollowTarget">
+            <option value="filter">Filter Cutoff</option>
+            <option value="volume">Volume</option>
+            <option value="pitch">Pitch</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="volume">Volume:</label>
+          <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+          <span class="value-display">0.5</span>
+        </div>
+        <div class="control-group adsr">
+          <div>
+            <label for="attack">A</label>
+            <input type="range" id="attack" min="0.01" max="2" step="0.01" value="0.1">
+            <span class="value-display">0.1</span>
+          </div>
+          <div>
+            <label for="decay">D</label>
+            <input type="range" id="decay" min="0.01" max="2" step="0.01" value="0.1">
+            <span class="value-display">0.1</span>
+          </div>
+          <div>
+            <label for="sustain">S</label>
+            <input type="range" id="sustain" min="0.01" max="1" step="0.01" value="0.8">
+            <span class="value-display">0.8</span>
+          </div>
+          <div>
+            <label for="release">R</label>
+            <input type="range" id="release" min="0.01" max="3" step="0.01" value="0.5">
+            <span class="value-display">0.5</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="filterCutoff">Filter Cutoff (Hz):</label>
+          <input type="range" id="filterCutoff" min="20" max="20000" step="1" value="20000">
+          <span class="value-display">20000</span>
+        </div>
+        <div class="control-group">
+          <label for="filterResonance">Filter Resonance:</label>
+          <input type="range" id="filterResonance" min="0" max="10" step="0.1" value="1">
+          <span class="value-display">1</span>
+        </div>
+        <div class="control-group">
+          <label for="lfoWaveform">LFO Waveform:</label>
+          <select id="lfoWaveform">
+            <option value="sine" selected>Sine</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+            <option value="triangle">Triangle</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="lfoFrequency">LFO Frequency (Hz):</label>
+          <input type="range" id="lfoFrequency" min="0.1" max="20" step="0.1" value="1">
+          <span class="value-display">1</span>
+        </div>
+        <div class="control-group">
+          <label for="lfoAmount">LFO Amount:</label>
+          <input type="range" id="lfoAmount" min="0" max="100" step="1" value="10">
+          <span class="value-display">10</span>
+        </div>
+        <div class="control-group">
+          <label for="lfoTarget">LFO Target:</label>
+          <select id="lfoTarget">
+            <option value="filterCutoff" selected>Filter Cutoff</option>
+            <option value="oscillatorFrequency">Oscillator Frequency</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="arpEnabled">Arpeggiator:</label>
+          <label class="switch">
+            <input type="checkbox" id="arpEnabled">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="control-group">
+          <label for="arpPattern">Pattern:</label>
+          <select id="arpPattern">
+            <option value="up" selected>Up</option>
+            <option value="down">Down</option>
+            <option value="upDown">Up & Down</option>
+            <option value="random">Random</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="arpRate">Rate (Hz):</label>
+          <input type="range" id="arpRate" min="1" max="16" step="1" value="4">
+          <span class="value-display">4</span>
+        </div>
+        <div class="control-group">
+          <label for="arpOctaves">Octaves:</label>
+          <input type="range" id="arpOctaves" min="1" max="3" step="1" value="1">
+          <span class="value-display">1</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Effects Tab -->
+    <div class="tab-content" id="effects-tab">
+      <div class="effects-controls">
+        <!-- Reverb -->
+        <div class="effect-section">
+          <div class="effect-header">
+            <h3>Reverb</h3>
+            <label class="switch">
+              <input type="checkbox" id="reverb-enabled" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-group">
+            <label for="reverb-mix">Mix:</label>
+            <input type="range" id="reverb-mix" min="0" max="1" step="0.01" value="0.3">
+            <span class="value-display">0.3</span>
+          </div>
+          <div class="control-group">
+            <label for="reverb-decay">Decay:</label>
+            <input type="range" id="reverb-decay" min="0.1" max="10" step="0.1" value="2">
+            <span class="value-display">2</span>
+          </div>
+        </div>
+        
+        <!-- Delay -->
+        <div class="effect-section">
+          <div class="effect-header">
+            <h3>Delay</h3>
+            <label class="switch">
+              <input type="checkbox" id="delay-enabled" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-group">
+            <label for="delay-time">Time (s):</label>
+            <input type="range" id="delay-time" min="0.05" max="1" step="0.01" value="0.3">
+            <span class="value-display">0.3</span>
+          </div>
+          <div class="control-group">
+            <label for="delay-feedback">Feedback:</label>
+            <input type="range" id="delay-feedback" min="0" max="0.9" step="0.01" value="0.4">
+            <span class="value-display">0.4</span>
+          </div>
+          <div class="control-group">
+            <label for="delay-mix">Mix:</label>
+            <input type="range" id="delay-mix" min="0" max="1" step="0.01" value="0.3">
+            <span class="value-display">0.3</span>
+          </div>
+        </div>
+        
+        <!-- Distortion -->
+        <div class="effect-section">
+          <div class="effect-header">
+            <h3>Distortion</h3>
+            <label class="switch">
+              <input type="checkbox" id="distortion-enabled">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-group">
+            <label for="distortion-amount">Amount:</label>
+            <input type="range" id="distortion-amount" min="0" max="50" step="1" value="20">
+            <span class="value-display">20</span>
+          </div>
+          <div class="control-group">
+            <label for="distortion-tone">Tone:</label>
+            <input type="range" id="distortion-tone" min="100" max="10000" step="100" value="4000">
+            <span class="value-display">4000</span>
+          </div>
+        </div>
+        
+        <!-- Chorus -->
+        <div class="effect-section">
+          <div class="effect-header">
+            <h3>Chorus</h3>
+            <label class="switch">
+              <input type="checkbox" id="chorus-enabled">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-group">
+            <label for="chorus-rate">Rate (Hz):</label>
+            <input type="range" id="chorus-rate" min="0.1" max="5" step="0.1" value="1.5">
+            <span class="value-display">1.5</span>
+          </div>
+          <div class="control-group">
+            <label for="chorus-depth">Depth:</label>
+            <input type="range" id="chorus-depth" min="0" max="1" step="0.01" value="0.7">
+            <span class="value-display">0.7</span>
+          </div>
+          <div class="control-group">
+            <label for="chorus-mix">Mix:</label>
+            <input type="range" id="chorus-mix" min="0" max="1" step="0.01" value="0.5">
+            <span class="value-display">0.5</span>
+          </div>
+        </div>
+        
+        <!-- Compressor -->
+        <div class="effect-section">
+          <div class="effect-header">
+            <h3>Compressor</h3>
+            <label class="switch">
+              <input type="checkbox" id="compressor-enabled" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-group">
+            <label for="compressor-threshold">Threshold (dB):</label>
+            <input type="range" id="compressor-threshold" min="-60" max="0" step="1" value="-24">
+            <span class="value-display">-24</span>
+          </div>
+          <div class="control-group">
+            <label for="compressor-ratio">Ratio:</label>
+            <input type="range" id="compressor-ratio" min="1" max="20" step="0.5" value="4">
+            <span class="value-display">4</span>
+          </div>
+          <div class="control-group">
+            <label for="compressor-attack">Attack (ms):</label>
+            <input type="range" id="compressor-attack" min="0" max="100" step="1" value="5">
+            <span class="value-display">5</span>
+          </div>
+          <div class="control-group">
+            <label for="compressor-release">Release (ms):</label>
+            <input type="range" id="compressor-release" min="0" max="1000" step="10" value="250">
+            <span class="value-display">250</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Patches Tab -->
+    <div class="tab-content" id="patches-tab">
+      <div class="patches-manager">
+        <div class="patch-save-section">
+          <h3>Save Current Patch</h3>
+          <div class="patch-controls">
+            <input type="text" id="patchName" placeholder="Patch Name">
+            <input type="text" id="patchTags" placeholder="Tags (comma separated)">
+            <select id="patchCategory">
+              <option value="lead">Lead</option>
+              <option value="bass">Bass</option>
+              <option value="pad">Pad</option>
+              <option value="fx">FX</option>
+              <option value="keys">Keys</option>
+            </select>
+            <button id="savePatch">Save</button>
+            <button id="sharePatch">Share</button>
+          </div>
+        </div>
+        
+        <div class="patch-list-section">
+          <h3>Patch Library</h3>
+          <div class="patch-list" id="patchList">
+            <!-- Patches will be listed here dynamically -->
+            <div class="no-patches">No patches saved yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Drum Machine Tab -->
+    <div class="tab-content" id="drum-machine-tab">
+      <div class="drum-machine-controls">
+        <h3>Drum Machine</h3>
+        <div class="sequencer-grid" id="drum-machine-grid">
+          <!-- Steps will be generated dynamically -->
+        </div>
+        <button id="playDrumSequencer">Play</button>
+      </div>
+    </div>
+
+    <!-- Keyboard -->
+    <div id="keyboard" class="temp-keyboard-test">
+      <!-- Keyboard will be created dynamically -->
+    </div>
+
+    <!-- Visualization Section -->
+    <div class="visualization-container">
+      <canvas id="spectrumAnalyzer"></canvas>
+      <canvas id="oscilloscope"></canvas>
+      <div class="viz-controls">
+        <button id="toggleViz">Toggle Visualization</button>
+        <select id="vizType">
+          <option value="spectrum">Spectrum</option>
+          <option value="scope">Oscilloscope</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Recording Controls -->
+    <div class="recording-controls">
+      <button id="recordButton" class="record-btn">Record</button>
+      <button id="stopButton" class="record-btn" disabled>Stop</button>
+      <a id="downloadButton" class="record-btn" disabled>Download</a>
+      <span id="recordingStatus"></span>
+    </div>
+
+    <!-- Tutorial Mode -->
+    <div id="tutorialOverlay" class="tutorial-overlay hidden">
+      <div class="tutorial-content">
+        <h3>Welcome to JackSynth!</h3>
+        <div id="tutorialStep"></div>
+        <div class="tutorial-controls">
+          <button id="prevTutorial">Previous</button>
+          <button id="nextTutorial">Next</button>
+          <button id="skipTutorial">Skip Tutorial</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint">
+      Use your computer keyboard (A-K keys) to play notes. Click and drag on keys for microtonal tuning.
+    </div>
+  </div>
+  
+  <!-- Load dependencies as ES modules -->
+  <script src="main.js" type="module"></script>
+</body>
+</html>
+
