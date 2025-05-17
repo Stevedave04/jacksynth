@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let audioChunks = []
   let drumMachine
 
+  // Track active keyboard notes
+  const activeKeyboardNotes = new Set()
+
   // Effect Nodes (declared globally)
   const effectsChain = {} // To hold references to nodes in the chain
 
@@ -625,7 +628,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (arpEnabledToggle.checked) {
         handleArpeggiatorNote(note, true)
       } else {
-        startNote(note)
+        // Only start the note if it's not already playing
+        if (!activeKeyboardNotes.has(note)) {
+          startNote(note)
+          activeKeyboardNotes.add(note)
+          // Update visual feedback
+          const key = document.querySelector(`[data-note="${note}"]`)
+          if (key) key.classList.add('active')
+        }
       }
     }
   })
@@ -637,8 +647,23 @@ document.addEventListener("DOMContentLoaded", () => {
         handleArpeggiatorNote(note, false)
       } else {
         stopNote(note)
+        activeKeyboardNotes.delete(note)
+        // Update visual feedback
+        const key = document.querySelector(`[data-note="${note}"]`)
+        if (key) key.classList.remove('active')
       }
     }
+  })
+
+  // Add blur event listener to handle cases when window loses focus
+  window.addEventListener('blur', () => {
+    // Stop all active notes
+    activeKeyboardNotes.forEach(note => {
+      stopNote(note)
+      const key = document.querySelector(`[data-note="${note}"]`)
+      if (key) key.classList.remove('active')
+    })
+    activeKeyboardNotes.clear()
   })
 
   function updateNoteFrequencies() {
@@ -830,7 +855,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeStepSequencer()
   setupValueDisplays()
 
-  // Remove the duplicate HTML file
   console.log("JackSynth initialized successfully")
 })
-
