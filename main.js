@@ -792,9 +792,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function initDrumMachine() {
     if (!audioContext) initAudioContext();
     drumMachine = new DrumMachine(audioContext);
-    drumMachine.loadSamples().then(() => {
-      console.log('Drum samples loaded');
-    });
+    
+    console.log('Drum machine initialized with synthetic samples');
 
     document.addEventListener('drumpad-toggle', (e) => {
       const { row, step } = e.detail;
@@ -803,10 +802,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('playDrums')?.addEventListener('click', () => {
       drumMachine.start();
+      document.getElementById('playDrums').disabled = true;
+      document.getElementById('stopDrums').disabled = false;
     });
 
     document.getElementById('stopDrums')?.addEventListener('click', () => {
       drumMachine.stop();
+      document.getElementById('playDrums').disabled = false;
+      document.getElementById('stopDrums').disabled = true;
+    });
+
+    document.getElementById('clearDrums')?.addEventListener('click', () => {
+      drumMachine.clear();
     });
 
     document.getElementById('drumTempo')?.addEventListener('input', (e) => {

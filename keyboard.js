@@ -268,7 +268,7 @@ export function initializeDrumSequencer() {
   drumGrid.innerHTML = "";
   drumGrid.className = "drum-grid";
 
-  const drums = ['Kick', 'Snare', 'HiHat', 'Clap'];
+  const drums = ['Kick', 'Snare', 'Hi-Hat', 'Clap'];
   drums.forEach((drum, row) => {
     const rowDiv = document.createElement('div');
     rowDiv.className = 'drum-row';
@@ -298,8 +298,9 @@ export function initializeDrumSequencer() {
   const controls = document.createElement('div');
   controls.className = 'drum-controls';
   controls.innerHTML = `
-    <button id="playDrums">Play</button>
-    <button id="stopDrums">Stop</button>
+    <button id="playDrums">▶ Play</button>
+    <button id="stopDrums">⏹ Stop</button>
+    <button id="clearDrums">🗑 Clear</button>
     <div class="control-group">
       <label for="drumTempo">Tempo:</label>
       <input type="range" id="drumTempo" min="60" max="200" value="120">

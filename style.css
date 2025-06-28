@@ -547,9 +547,105 @@ canvas {
   transition: all 0.1s ease;
 }
 
+/* Drum Machine Styles */
+.drum-machine-controls {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.drum-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.drum-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drum-row-label {
+  min-width: 80px;
+  font-weight: bold;
+  color: #ecf0f1;
+  text-align: left;
+  font-size: 0.9em;
+}
+
 .drum-pad {
-  /* Basic style for drum pads */
-  display: block;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.drum-pad:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.drum-pad.active {
+  background: #e74c3c;
+  border-color: #c0392b;
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+.drum-pad.playing {
+  background: #2ecc71;
+  border-color: #27ae60;
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.8);
+  transform: scale(1.1);
+}
+
+.drum-pad.active.playing {
+  background: #f39c12;
+  border-color: #e67e22;
+  box-shadow: 0 0 15px rgba(243, 156, 18, 0.8);
+}
+
+.drum-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.drum-controls button {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: all 0.2s ease;
+}
+
+.drum-controls button:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.drum-controls button:active {
+  transform: translateY(0);
+}
+
+.drum-controls button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Tutorial Mode */
@@ -631,6 +727,21 @@ canvas {
   .patches-manager {
     grid-template-columns: 1fr;
   }
+  
+  .drum-pad {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .drum-row-label {
+    min-width: 60px;
+    font-size: 0.8em;
+  }
+  
+  .drum-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -643,5 +754,14 @@ canvas {
   .effects-controls {
     grid-template-columns: 1fr;
   }
+  
+  .drum-pad {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .drum-row-label {
+    min-width: 50px;
+    font-size: 0.7em;
+  }
 }
-
