@@ -10,10 +10,10 @@ export class DrumMachine {
     
     // Define drum types - we'll create synthetic sounds instead of loading samples
     this.drumTypes = {
-      'kick': { type: 'kick', frequency: 60 },
-      'snare': { type: 'snare', frequency: 200 },
-      'hihat': { type: 'hihat', frequency: 8000 },
-      'clap': { type: 'clap', frequency: 1000 }
+      'kick': { type: 'kick' },
+      'snare': { type: 'snare' },
+      'hihat': { type: 'hihat' },
+      'clap': { type: 'clap' }
     };
     
     this.createSyntheticSamples();

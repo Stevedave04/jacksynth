@@ -38,16 +38,6 @@ const baseNoteFrequencies = {
   B5: { freq: 987.77, key: ";" }
 }
 
-// Step Sequencer Configuration
-const sequencer = {
-  steps: Array(16).fill(0),
-  currentStep: 0,
-  isPlaying: false,
-  interval: null,
-  target: "pitch",
-  stepValues: [-12, -7, -5, 0, 2, 4, 7, 12],
-}
-
 export function createKeyboard(options) {
   const { keyboardDiv, octaves, initAudioContext, startNote, stopNote } = options
 

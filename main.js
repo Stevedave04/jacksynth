@@ -1,6 +1,5 @@
 import { Visualizer } from "./visualization.js"
-import { SynthTutorial } from "./tutorial.js"
-import { createKeyboard, baseNoteFrequencies, initializeStepSequencer, initializeDrumSequencer } from "./keyboard.js"
+import { createKeyboard, baseNoteFrequencies, initializeDrumSequencer } from "./keyboard.js"
 import { DrumMachine } from './drumMachine.js';
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let audioContext
   let masterCompressor
-  const stepSequencerTimer = null
   let mediaRecorder
   let audioChunks = []
   let drumMachine
@@ -375,13 +373,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const compressorAttackSlider = document.getElementById("compressor-attack")
   const compressorReleaseSlider = document.getElementById("compressor-release")
 
-  const filterTypeSelect = document.getElementById("filterType")
-
-  // DOM Elements - Patch Controls
-  const patchNameInput = document.getElementById("patchName")
-  const savePatchButton = document.getElementById("savePatch")
-  const patchList = document.getElementById("patchList")
-
   // Tab Navigation
   const tabButtons = document.querySelectorAll(".tab-button")
   const tabContents = document.querySelectorAll(".tab-content")
@@ -392,27 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Arpeggiator state
   let arpeggiatorActive = false
   let arpeggiatorNotes = []
-  const arpeggiatorIndex = 0
   let arpeggiatorTimer = null
-
-  // Step Sequencer Configuration
-  const sequencer = {
-    steps: Array(16).fill(0),
-    currentStep: 0,
-    isPlaying: false,
-    interval: null,
-    target: "pitch",
-    stepValues: [-12, -7, -5, 0, 2, 4, 7, 12],
-  }
-
-  // Envelope Follower
-  const envelopeFollower = {
-    sensitivity: 0.5,
-    target: "filter",
-    analyser: null,
-    dataArray: null,
-    lastValue: 0,
-  }
 
   const noteFrequencies = Object.fromEntries(
     Object.entries(baseNoteFrequencies).map(([note, data]) => [note, data.freq]),
@@ -477,7 +448,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     filterCutoffSlider.value = "20000"
     filterResonanceSlider.value = "1"
-    if (filterTypeSelect) filterTypeSelect.value = "lowpass"
 
     lfoWaveformSelect.value = "sine"
     lfoFrequencySlider.value = "1"
@@ -737,44 +707,6 @@ document.addEventListener("DOMContentLoaded", () => {
     arpeggiatorActive = false
   }
 
-  function setupEnvelopeFollower() {
-    if (!audioContext) return
-
-    envelopeFollower.analyser = audioContext.createAnalyser()
-    envelopeFollower.analyser.fftSize = 2048
-    envelopeFollower.dataArray = new Float32Array(envelopeFollower.analyser.frequencyBinCount)
-    masterCompressor.connect(envelopeFollower.analyser)
-  }
-
-  function processEnvelopeFollower() {
-    if (!envelopeFollower.analyser) return
-
-    envelopeFollower.analyser.getFloatTimeDomainData(envelopeFollower.dataArray)
-    let sum = 0
-    for (let i = 0; i < envelopeFollower.dataArray.length; i++) {
-      sum += Math.abs(envelopeFollower.dataArray[i])
-    }
-    const average = sum / envelopeFollower.dataArray.length
-    const value = average * envelopeFollower.sensitivity
-
-    applyEnvelopeFollower(value)
-  }
-
-  function applyEnvelopeFollower(value) {
-    switch (envelopeFollower.target) {
-      case "filter":
-        if (effectsChain.filterNode) {
-          const baseCutoff = Number.parseFloat(filterCutoffSlider.value)
-          // Map the envelope value (0-1 range approx) to a frequency range
-          const modulatedCutoff = baseCutoff + value * baseCutoff
-          // Clamp the value to avoid extreme frequencies
-          const clampedCutoff = Math.max(20, Math.min(20000, modulatedCutoff))
-          effectsChain.filterNode.frequency.setTargetAtTime(clampedCutoff, audioContext.currentTime, 0.01)
-        }
-        break
-    }
-  }
-
   function initializeKeyboard() {
     const options = {
       keyboardDiv: document.getElementById("keyboard"),
@@ -822,14 +754,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Initialize tutorial after ensuring SynthTutorial is available
-  const tutorial = new SynthTutorial()
-  document
-    .getElementById("startTutorial")
-    ?.addEventListener("click", () => {
-      tutorial.start()
-    })
-
   // Add event listeners for effect controls
   ;[
     reverbEnabledToggle,
@@ -859,7 +783,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize components
   initAudioContext()
   initializeKeyboard()
-  initializeStepSequencer()
   setupValueDisplays()
 
   console.log("JackSynth initialized successfully")

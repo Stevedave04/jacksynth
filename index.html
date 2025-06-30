@@ -15,7 +15,6 @@
     <div class="tabs">
       <button class="tab-button active" data-tab="synth">Synth</button>
       <button class="tab-button" data-tab="effects">Effects</button>
-      <button class="tab-button" data-tab="patches">Patches</button>
       <button class="tab-button" data-tab="drum-machine">Drum Machine</button>
     </div>
     
@@ -77,31 +76,6 @@
           <label for="modulationAmount">Amount:</label>
           <input type="range" id="modulationAmount" min="-100" max="100" step="1" value="0">
           <span class="value-display">0</span>
-        </div>
-
-        <div class="control-group">
-          <h3>Step Sequencer</h3>
-          <div class="sequencer-grid" id="stepSequencer">
-            <!-- Steps will be generated dynamically -->
-          </div>
-          <select id="sequencerTarget">
-            <option value="pitch">Pitch</option>
-            <option value="filter">Filter</option>
-            <option value="volume">Volume</option>
-          </select>
-          <button id="playSequencer">Play</button>
-        </div>
-
-        <div class="control-group">
-          <h3>Envelope Follower</h3>
-          <label for="envFollowSensitivity">Sensitivity:</label>
-          <input type="range" id="envFollowSensitivity" min="0" max="1" step="0.01" value="0.5">
-          <span class="value-display">0.5</span>
-          <select id="envFollowTarget">
-            <option value="filter">Filter Cutoff</option>
-            <option value="volume">Volume</option>
-            <option value="pitch">Pitch</option>
-          </select>
         </div>
 
         <div class="control-group">
@@ -326,36 +300,6 @@
       </div>
     </div>
     
-    <!-- Patches Tab -->
-    <div class="tab-content" id="patches-tab">
-      <div class="patches-manager">
-        <div class="patch-save-section">
-          <h3>Save Current Patch</h3>
-          <div class="patch-controls">
-            <input type="text" id="patchName" placeholder="Patch Name">
-            <input type="text" id="patchTags" placeholder="Tags (comma separated)">
-            <select id="patchCategory">
-              <option value="lead">Lead</option>
-              <option value="bass">Bass</option>
-              <option value="pad">Pad</option>
-              <option value="fx">FX</option>
-              <option value="keys">Keys</option>
-            </select>
-            <button id="savePatch">Save</button>
-            <button id="sharePatch">Share</button>
-          </div>
-        </div>
-        
-        <div class="patch-list-section">
-          <h3>Patch Library</h3>
-          <div class="patch-list" id="patchList">
-            <!-- Patches will be listed here dynamically -->
-            <div class="no-patches">No patches saved yet</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
     <!-- Drum Machine Tab -->
     <div class="tab-content" id="drum-machine-tab">
       <div class="drum-machine-controls">
@@ -392,19 +336,6 @@
       <button id="stopButton" class="record-btn" disabled>Stop</button>
       <a id="downloadButton" class="record-btn" disabled>Download</a>
       <span id="recordingStatus"></span>
-    </div>
-
-    <!-- Tutorial Mode -->
-    <div id="tutorialOverlay" class="tutorial-overlay hidden">
-      <div class="tutorial-content">
-        <h3>Welcome to JackSynth!</h3>
-        <div id="tutorialStep"></div>
-        <div class="tutorial-controls">
-          <button id="prevTutorial">Previous</button>
-          <button id="nextTutorial">Next</button>
-          <button id="skipTutorial">Skip Tutorial</button>
-        </div>
-      </div>
     </div>
 
     <div class="hint">

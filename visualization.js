@@ -159,9 +159,5 @@ export class Visualizer {
 
     requestAnimationFrame(this.draw)
   }
-
-  getAnalyzerNode() {
-    return this.analyzer
-  }
 }
 
