@@ -84,24 +84,28 @@
           <div class="sequencer-grid" id="stepSequencer">
             <!-- Steps will be generated dynamically -->
           </div>
-          <select id="sequencerTarget">
-            <option value="pitch">Pitch</option>
-            <option value="filter">Filter</option>
-            <option value="volume">Volume</option>
-          </select>
-          <button id="playSequencer">Play</button>
+          <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center;">
+            <select id="sequencerTarget">
+              <option value="pitch">Pitch</option>
+              <option value="filter">Filter</option>
+              <option value="volume">Volume</option>
+            </select>
+            <button id="playSequencer">Play</button>
+          </div>
         </div>
 
         <div class="control-group">
           <h3>Envelope Follower</h3>
-          <label for="envFollowSensitivity">Sensitivity:</label>
-          <input type="range" id="envFollowSensitivity" min="0" max="1" step="0.01" value="0.5">
-          <span class="value-display">0.5</span>
-          <select id="envFollowTarget">
-            <option value="filter">Filter Cutoff</option>
-            <option value="volume">Volume</option>
-            <option value="pitch">Pitch</option>
-          </select>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label for="envFollowSensitivity">Sensitivity:</label>
+            <input type="range" id="envFollowSensitivity" min="0" max="1" step="0.01" value="0.5">
+            <span class="value-display">0.5</span>
+            <select id="envFollowTarget">
+              <option value="filter">Filter Cutoff</option>
+              <option value="volume">Volume</option>
+              <option value="pitch">Pitch</option>
+            </select>
+          </div>
         </div>
 
         <div class="control-group">
@@ -140,6 +144,15 @@
           <label for="filterResonance">Filter Resonance:</label>
           <input type="range" id="filterResonance" min="0" max="10" step="0.1" value="1">
           <span class="value-display">1</span>
+        </div>
+        <div class="control-group">
+          <label for="filterType">Filter Type:</label>
+          <select id="filterType">
+            <option value="lowpass" selected>Low Pass</option>
+            <option value="highpass">High Pass</option>
+            <option value="bandpass">Band Pass</option>
+            <option value="notch">Notch</option>
+          </select>
         </div>
         <div class="control-group">
           <label for="lfoWaveform">LFO Waveform:</label>
@@ -363,7 +376,6 @@
         <div class="sequencer-grid" id="drum-machine-grid">
           <!-- Steps will be generated dynamically -->
         </div>
-        <button id="playDrumSequencer">Play</button>
       </div>
     </div>
 
@@ -409,6 +421,8 @@
 
     <div class="hint">
       Use your computer keyboard (A-K keys) to play notes. Click and drag on keys for microtonal tuning.
+      <br>
+      <button id="startTutorial" style="margin-top: 10px; padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">Start Tutorial</button>
     </div>
   </div>
   

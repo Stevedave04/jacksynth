@@ -8,16 +8,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let audioContext
   let masterCompressor
-  const stepSequencerTimer = null
   let mediaRecorder
   let audioChunks = []
   let drumMachine
+  let lfoOscillator = null
+  let lfoGain = null
 
   // Track active keyboard notes
   const activeKeyboardNotes = new Set()
 
   // Effect Nodes (declared globally)
   const effectsChain = {} // To hold references to nodes in the chain
+
+  // Arpeggiator state
+  let arpeggiatorActive = false
+  let arpeggiatorNotes = []
+  let arpeggiatorIndex = 0
+  let arpeggiatorTimer = null
+
+  // Step Sequencer Configuration
+  const sequencer = {
+    steps: Array(16).fill(0),
+    currentStep: 0,
+    isPlaying: false,
+    interval: null,
+    target: "pitch",
+    stepValues: [-12, -7, -5, 0, 2, 4, 7, 12],
+  }
+
+  // Envelope Follower
+  const envelopeFollower = {
+    sensitivity: 0.5,
+    target: "filter",
+    analyser: null,
+    dataArray: null,
+    lastValue: 0,
+  }
+
+  const noteFrequencies = Object.fromEntries(
+    Object.entries(baseNoteFrequencies).map(([note, data]) => [note, data.freq]),
+  )
+
+  const microtonalSettings = {}
+
+  const keyNoteMap = {}
+  Object.entries(baseNoteFrequencies).forEach(([note, data]) => {
+    if (data.key) {
+      keyNoteMap[data.key] = note
+    }
+  })
+
+  // Audio Context and Nodes
+  const activeOscillators = {}
 
   /**
    * Initializes the audio context and sets up the master compressor.
@@ -39,6 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Setup envelope follower
       setupEnvelopeFollower()
+
+      // Setup LFO
+      setupLFO()
 
       console.log("Audio context initialized successfully")
     } catch (error) {
@@ -124,6 +169,20 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Effects chain initialized successfully")
   }
 
+  function setupLFO() {
+    if (!audioContext) return
+
+    lfoOscillator = audioContext.createOscillator()
+    lfoGain = audioContext.createGain()
+    
+    lfoOscillator.type = 'sine'
+    lfoOscillator.frequency.value = 1
+    lfoGain.gain.value = 0
+    
+    lfoOscillator.connect(lfoGain)
+    lfoOscillator.start()
+  }
+
   /**
    * Updates the effects chain based on user settings.
    * This should be called whenever effect settings change.
@@ -155,8 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update filter settings
     const filterCutoff = Number.parseFloat(document.getElementById("filterCutoff")?.value || 20000)
     const filterResonance = Number.parseFloat(document.getElementById("filterResonance")?.value || 1)
+    const filterType = document.getElementById("filterType")?.value || "lowpass"
     effectsChain.filterNode.frequency.value = filterCutoff
     effectsChain.filterNode.Q.value = filterResonance
+    effectsChain.filterNode.type = filterType
 
     // Update distortion settings
     if (distortionEnabled) {
@@ -227,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Build the effects chain based on enabled effects
-    const currentNode = effectsChain.filterNode // Start with filter (always enabled)
+    let currentNode = effectsChain.filterNode // Start with filter (always enabled)
     let lastNode = currentNode
 
     // Add distortion if enabled
@@ -293,39 +354,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  document.getElementById("recordButton")?.addEventListener("click", () => {
-    if (!audioContext) initAudioContext()
-    if (!mediaRecorder) initRecording()
-
-    audioChunks = []
-    mediaRecorder.start()
-    document.getElementById("recordButton").classList.add("recording")
-    document.getElementById("recordButton").disabled = true
-    document.getElementById("stopButton").disabled = false
-  })
-
-  document.getElementById("stopButton")?.addEventListener("click", () => {
-    mediaRecorder.stop()
-    document.getElementById("recordButton").classList.remove("recording")
-    document.getElementById("recordButton").disabled = false
-    document.getElementById("stopButton").disabled = true
-  })
-
-  try {
-    const keyboardDiv = document.getElementById("keyboard")
-    if (!keyboardDiv) {
-      throw new Error("Keyboard div not found")
-    }
-
-    console.log("Keyboard div found")
-  } catch (error) {
-    console.error("Failed to find keyboard div:", error)
-    const errorDiv = document.getElementById("keyboard-error")
-    if (errorDiv) {
-      errorDiv.style.display = "block"
-    }
-  }
-
   // DOM Elements - Synth Controls
   const keyboardDiv = document.getElementById("keyboard")
   const resetButton = document.getElementById("resetToDefault")
@@ -385,47 +413,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Tab Navigation
   const tabButtons = document.querySelectorAll(".tab-button")
   const tabContents = document.querySelectorAll(".tab-content")
-
-  // Audio Context and Nodes
-  const activeOscillators = {}
-
-  // Arpeggiator state
-  let arpeggiatorActive = false
-  let arpeggiatorNotes = []
-  const arpeggiatorIndex = 0
-  let arpeggiatorTimer = null
-
-  // Step Sequencer Configuration
-  const sequencer = {
-    steps: Array(16).fill(0),
-    currentStep: 0,
-    isPlaying: false,
-    interval: null,
-    target: "pitch",
-    stepValues: [-12, -7, -5, 0, 2, 4, 7, 12],
-  }
-
-  // Envelope Follower
-  const envelopeFollower = {
-    sensitivity: 0.5,
-    target: "filter",
-    analyser: null,
-    dataArray: null,
-    lastValue: 0,
-  }
-
-  const noteFrequencies = Object.fromEntries(
-    Object.entries(baseNoteFrequencies).map(([note, data]) => [note, data.freq]),
-  )
-
-  const microtonalSettings = {}
-
-  const keyNoteMap = {}
-  Object.entries(baseNoteFrequencies).forEach(([note, data]) => {
-    if (data.key) {
-      keyNoteMap[data.key] = note
-    }
-  })
 
   tabButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -524,18 +511,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (audioContext) {
       updateEffectsChain()
+      updateLFO()
     }
 
     console.log("Reset to default values")
     alert("All settings have been reset to default values")
   }
 
-  arpOctavesSlider?.addEventListener("input", () => {
-    if (arpeggiatorActive) {
-      stopArpeggiator()
-      startArpeggiator()
+  function updateLFO() {
+    if (!lfoOscillator || !lfoGain) return
+
+    const frequency = Number.parseFloat(lfoFrequencySlider.value)
+    const amount = Number.parseFloat(lfoAmountSlider.value)
+    const target = lfoTargetSelect.value
+    const waveform = lfoWaveformSelect.value
+
+    lfoOscillator.frequency.value = frequency
+    lfoOscillator.type = waveform
+
+    // Disconnect previous connections
+    try {
+      lfoGain.disconnect()
+    } catch (e) {
+      // Ignore disconnection errors
     }
-  })
+
+    // Connect to target parameter
+    switch (target) {
+      case 'filterCutoff':
+        if (effectsChain.filterNode) {
+          lfoGain.gain.value = amount
+          lfoGain.connect(effectsChain.filterNode.frequency)
+        }
+        break
+      case 'oscillatorFrequency':
+        // This would need to be connected to active oscillators
+        lfoGain.gain.value = amount / 100 // Scale down for frequency modulation
+        break
+    }
+  }
 
   function startNote(note, frequencyOverride = null) {
     if (!audioContext) {
@@ -579,8 +593,13 @@ document.addEventListener("DOMContentLoaded", () => {
     gainNode1.connect(adsrGain)
     gainNode2.connect(adsrGain)
 
+    // Apply volume control
+    const volumeGain = audioContext.createGain()
+    volumeGain.gain.value = Number.parseFloat(volumeSlider.value)
+    adsrGain.connect(volumeGain)
+
     // Connect to the first node in the effects chain
-    adsrGain.connect(effectsChain.filterNode)
+    volumeGain.connect(effectsChain.filterNode)
 
     const attackTime = Number.parseFloat(attackSlider.value)
     const decayTime = Number.parseFloat(decaySlider.value)
@@ -599,6 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
       gainNode1: gainNode1,
       gainNode2: gainNode2,
       adsrGain: adsrGain,
+      volumeGain: volumeGain,
     }
   }
 
@@ -613,58 +633,19 @@ document.addEventListener("DOMContentLoaded", () => {
     adsrGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + releaseTime)
 
     setTimeout(() => {
-      osc1.stop()
-      osc2.stop()
-      osc1.disconnect()
-      osc2.disconnect()
-      adsrGain.disconnect()
+      try {
+        osc1.stop()
+        osc2.stop()
+        osc1.disconnect()
+        osc2.disconnect()
+        adsrGain.disconnect()
+        oscillatorData.volumeGain.disconnect()
+      } catch (e) {
+        // Ignore disconnection errors
+      }
       delete activeOscillators[note]
     }, releaseTime * 1000)
   }
-
-  document.addEventListener("keydown", (event) => {
-    const note = keyNoteMap[event.key]
-    if (note && !event.repeat) {
-      if (arpEnabledToggle.checked) {
-        handleArpeggiatorNote(note, true)
-      } else {
-        // Only start the note if it's not already playing
-        if (!activeKeyboardNotes.has(note)) {
-          startNote(note)
-          activeKeyboardNotes.add(note)
-          // Update visual feedback
-          const key = document.querySelector(`[data-note="${note}"]`)
-          if (key) key.classList.add('active')
-        }
-      }
-    }
-  })
-
-  document.addEventListener("keyup", (event) => {
-    const note = keyNoteMap[event.key]
-    if (note) {
-      if (arpEnabledToggle.checked) {
-        handleArpeggiatorNote(note, false)
-      } else {
-        stopNote(note)
-        activeKeyboardNotes.delete(note)
-        // Update visual feedback
-        const key = document.querySelector(`[data-note="${note}"]`)
-        if (key) key.classList.remove('active')
-      }
-    }
-  })
-
-  // Add blur event listener to handle cases when window loses focus
-  window.addEventListener('blur', () => {
-    // Stop all active notes
-    activeKeyboardNotes.forEach(note => {
-      stopNote(note)
-      const key = document.querySelector(`[data-note="${note}"]`)
-      if (key) key.classList.remove('active')
-    })
-    activeKeyboardNotes.clear()
-  })
 
   function updateNoteFrequencies() {
     Object.keys(microtonalSettings).forEach((note) => {
@@ -744,6 +725,13 @@ document.addEventListener("DOMContentLoaded", () => {
     envelopeFollower.analyser.fftSize = 2048
     envelopeFollower.dataArray = new Float32Array(envelopeFollower.analyser.frequencyBinCount)
     masterCompressor.connect(envelopeFollower.analyser)
+
+    // Start processing envelope follower
+    function processLoop() {
+      processEnvelopeFollower()
+      requestAnimationFrame(processLoop)
+    }
+    processLoop()
   }
 
   function processEnvelopeFollower() {
@@ -822,13 +810,288 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Initialize tutorial after ensuring SynthTutorial is available
-  const tutorial = new SynthTutorial()
-  document
-    .getElementById("startTutorial")
-    ?.addEventListener("click", () => {
-      tutorial.start()
+  // Patch Management Functions
+  function getCurrentPatch() {
+    return {
+      name: patchNameInput?.value || 'Untitled',
+      waveform1: waveformSelect1.value,
+      waveform2: waveformSelect2.value,
+      detune: Number.parseFloat(detuneSlider.value),
+      oscMix: Number.parseFloat(oscMixSlider.value),
+      volume: Number.parseFloat(volumeSlider.value),
+      attack: Number.parseFloat(attackSlider.value),
+      decay: Number.parseFloat(decaySlider.value),
+      sustain: Number.parseFloat(sustainSlider.value),
+      release: Number.parseFloat(releaseSlider.value),
+      filterCutoff: Number.parseFloat(filterCutoffSlider.value),
+      filterResonance: Number.parseFloat(filterResonanceSlider.value),
+      filterType: filterTypeSelect?.value || 'lowpass',
+      lfoWaveform: lfoWaveformSelect.value,
+      lfoFrequency: Number.parseFloat(lfoFrequencySlider.value),
+      lfoAmount: Number.parseFloat(lfoAmountSlider.value),
+      lfoTarget: lfoTargetSelect.value,
+      arpEnabled: arpEnabledToggle.checked,
+      arpPattern: arpPatternSelect.value,
+      arpRate: Number.parseInt(arpRateSlider.value),
+      arpOctaves: Number.parseInt(arpOctavesSlider.value),
+      reverbEnabled: reverbEnabledToggle.checked,
+      reverbMix: Number.parseFloat(reverbMixSlider.value),
+      reverbDecay: Number.parseFloat(reverbDecaySlider.value),
+      delayEnabled: delayEnabledToggle.checked,
+      delayTime: Number.parseFloat(delayTimeSlider.value),
+      delayFeedback: Number.parseFloat(delayFeedbackSlider.value),
+      delayMix: Number.parseFloat(delayMixSlider.value),
+      distortionEnabled: distortionEnabledToggle.checked,
+      distortionAmount: Number.parseFloat(distortionAmountSlider.value),
+      compressorEnabled: compressorEnabledToggle.checked,
+      compressorThreshold: Number.parseFloat(compressorThresholdSlider.value),
+      compressorRatio: Number.parseFloat(compressorRatioSlider.value),
+      compressorAttack: Number.parseFloat(compressorAttackSlider.value),
+      compressorRelease: Number.parseFloat(compressorReleaseSlider.value),
+      timestamp: Date.now()
+    }
+  }
+
+  function loadPatch(patch) {
+    waveformSelect1.value = patch.waveform1 || 'sine'
+    waveformSelect2.value = patch.waveform2 || 'sine'
+    detuneSlider.value = patch.detune || 0
+    oscMixSlider.value = patch.oscMix || 0.5
+    volumeSlider.value = patch.volume || 0.5
+    attackSlider.value = patch.attack || 0.1
+    decaySlider.value = patch.decay || 0.1
+    sustainSlider.value = patch.sustain || 0.8
+    releaseSlider.value = patch.release || 0.5
+    filterCutoffSlider.value = patch.filterCutoff || 20000
+    filterResonanceSlider.value = patch.filterResonance || 1
+    if (filterTypeSelect) filterTypeSelect.value = patch.filterType || 'lowpass'
+    lfoWaveformSelect.value = patch.lfoWaveform || 'sine'
+    lfoFrequencySlider.value = patch.lfoFrequency || 1
+    lfoAmountSlider.value = patch.lfoAmount || 10
+    lfoTargetSelect.value = patch.lfoTarget || 'filterCutoff'
+    arpEnabledToggle.checked = patch.arpEnabled || false
+    arpPatternSelect.value = patch.arpPattern || 'up'
+    arpRateSlider.value = patch.arpRate || 4
+    arpOctavesSlider.value = patch.arpOctaves || 1
+    reverbEnabledToggle.checked = patch.reverbEnabled !== undefined ? patch.reverbEnabled : true
+    reverbMixSlider.value = patch.reverbMix || 0.3
+    reverbDecaySlider.value = patch.reverbDecay || 2
+    delayEnabledToggle.checked = patch.delayEnabled !== undefined ? patch.delayEnabled : true
+    delayTimeSlider.value = patch.delayTime || 0.3
+    delayFeedbackSlider.value = patch.delayFeedback || 0.4
+    delayMixSlider.value = patch.delayMix || 0.3
+    distortionEnabledToggle.checked = patch.distortionEnabled || false
+    distortionAmountSlider.value = patch.distortionAmount || 20
+    compressorEnabledToggle.checked = patch.compressorEnabled !== undefined ? patch.compressorEnabled : true
+    compressorThresholdSlider.value = patch.compressorThreshold || -24
+    compressorRatioSlider.value = patch.compressorRatio || 4
+    compressorAttackSlider.value = patch.compressorAttack || 5
+    compressorReleaseSlider.value = patch.compressorRelease || 250
+
+    setupValueDisplays()
+    if (audioContext) {
+      updateEffectsChain()
+      updateLFO()
+    }
+  }
+
+  function savePatch() {
+    const patch = getCurrentPatch()
+    if (!patch.name.trim()) {
+      alert('Please enter a patch name')
+      return
+    }
+
+    const patches = JSON.parse(localStorage.getItem('jacksynth-patches') || '[]')
+    
+    // Check if patch name already exists
+    const existingIndex = patches.findIndex(p => p.name === patch.name)
+    if (existingIndex >= 0) {
+      if (!confirm('A patch with this name already exists. Overwrite?')) {
+        return
+      }
+      patches[existingIndex] = patch
+    } else {
+      patches.push(patch)
+    }
+
+    localStorage.setItem('jacksynth-patches', JSON.stringify(patches))
+    updatePatchList()
+    patchNameInput.value = ''
+    alert('Patch saved successfully!')
+  }
+
+  function deletePatch(patchName) {
+    if (!confirm(`Delete patch "${patchName}"?`)) return
+
+    const patches = JSON.parse(localStorage.getItem('jacksynth-patches') || '[]')
+    const filteredPatches = patches.filter(p => p.name !== patchName)
+    localStorage.setItem('jacksynth-patches', JSON.stringify(filteredPatches))
+    updatePatchList()
+  }
+
+  function updatePatchList() {
+    const patches = JSON.parse(localStorage.getItem('jacksynth-patches') || '[]')
+    
+    if (patches.length === 0) {
+      patchList.innerHTML = '<div class="no-patches">No patches saved yet</div>'
+      return
+    }
+
+    patchList.innerHTML = patches.map(patch => `
+      <div class="patch-item">
+        <div class="patch-name">${patch.name}</div>
+        <div class="patch-actions">
+          <button class="patch-button" onclick="loadPatchByName('${patch.name}')">Load</button>
+          <button class="patch-button" onclick="deletePatchByName('${patch.name}')">Delete</button>
+        </div>
+      </div>
+    `).join('')
+  }
+
+  // Make functions globally available for onclick handlers
+  window.loadPatchByName = function(patchName) {
+    const patches = JSON.parse(localStorage.getItem('jacksynth-patches') || '[]')
+    const patch = patches.find(p => p.name === patchName)
+    if (patch) {
+      loadPatch(patch)
+      alert(`Loaded patch: ${patchName}`)
+    }
+  }
+
+  window.deletePatchByName = function(patchName) {
+    deletePatch(patchName)
+  }
+
+  // Step Sequencer Functions
+  function startSequencer() {
+    if (sequencer.isPlaying) return
+    
+    sequencer.isPlaying = true
+    sequencer.currentStep = 0
+    
+    const bpm = 120 // Fixed BPM for now
+    const stepTime = (60 / bpm) / 4 // 16th notes
+    
+    sequencer.interval = setInterval(() => {
+      playSequencerStep()
+      updateSequencerVisual()
+      sequencer.currentStep = (sequencer.currentStep + 1) % 16
+    }, stepTime * 1000)
+  }
+
+  function stopSequencer() {
+    if (!sequencer.isPlaying) return
+    
+    sequencer.isPlaying = false
+    clearInterval(sequencer.interval)
+    sequencer.currentStep = 0
+    updateSequencerVisual()
+  }
+
+  function playSequencerStep() {
+    const stepValue = sequencer.steps[sequencer.currentStep]
+    if (stepValue === 0) return
+
+    switch (sequencer.target) {
+      case 'pitch':
+        // Play a note based on step value
+        const baseNote = 'C4'
+        const baseFreq = noteFrequencies[baseNote]
+        const semitoneOffset = sequencer.stepValues[stepValue - 1]
+        const frequency = baseFreq * Math.pow(2, semitoneOffset / 12)
+        startNote(baseNote, frequency)
+        setTimeout(() => stopNote(baseNote), 100)
+        break
+    }
+  }
+
+  function updateSequencerVisual() {
+    const steps = document.querySelectorAll('.sequencer-step')
+    steps.forEach((step, index) => {
+      step.classList.toggle('playing', index === sequencer.currentStep && sequencer.isPlaying)
     })
+  }
+
+  // Event Listeners
+  document.addEventListener("keydown", (event) => {
+    const note = keyNoteMap[event.key]
+    if (note && !event.repeat) {
+      if (arpEnabledToggle.checked) {
+        handleArpeggiatorNote(note, true)
+      } else {
+        // Only start the note if it's not already playing
+        if (!activeKeyboardNotes.has(note)) {
+          startNote(note)
+          activeKeyboardNotes.add(note)
+          // Update visual feedback
+          const key = document.querySelector(`[data-note="${note}"]`)
+          if (key) key.classList.add('active')
+        }
+      }
+    }
+  })
+
+  document.addEventListener("keyup", (event) => {
+    const note = keyNoteMap[event.key]
+    if (note) {
+      if (arpEnabledToggle.checked) {
+        handleArpeggiatorNote(note, false)
+      } else {
+        stopNote(note)
+        activeKeyboardNotes.delete(note)
+        // Update visual feedback
+        const key = document.querySelector(`[data-note="${note}"]`)
+        if (key) key.classList.remove('active')
+      }
+    }
+  })
+
+  // Add blur event listener to handle cases when window loses focus
+  window.addEventListener('blur', () => {
+    // Stop all active notes
+    activeKeyboardNotes.forEach(note => {
+      stopNote(note)
+      const key = document.querySelector(`[data-note="${note}"]`)
+      if (key) key.classList.remove('active')
+    })
+    activeKeyboardNotes.clear()
+  })
+
+  // Recording Controls
+  document.getElementById("recordButton")?.addEventListener("click", () => {
+    if (!audioContext) initAudioContext()
+    if (!mediaRecorder) initRecording()
+
+    audioChunks = []
+    mediaRecorder.start()
+    document.getElementById("recordButton").classList.add("recording")
+    document.getElementById("recordButton").disabled = true
+    document.getElementById("stopButton").disabled = false
+  })
+
+  document.getElementById("stopButton")?.addEventListener("click", () => {
+    mediaRecorder.stop()
+    document.getElementById("recordButton").classList.remove("recording")
+    document.getElementById("recordButton").disabled = false
+    document.getElementById("stopButton").disabled = true
+  })
+
+  // Synth Control Event Listeners
+  arpOctavesSlider?.addEventListener("input", () => {
+    if (arpeggiatorActive) {
+      stopArpeggiator()
+      startArpeggiator()
+    }
+  })
+
+  // LFO Control Event Listeners
+  ;[lfoWaveformSelect, lfoFrequencySlider, lfoAmountSlider, lfoTargetSelect].forEach((control) => {
+    if (control) {
+      control.addEventListener("change", updateLFO)
+      control.addEventListener("input", updateLFO)
+    }
+  })
 
   // Add event listeners for effect controls
   ;[
@@ -847,6 +1110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     compressorRatioSlider,
     compressorAttackSlider,
     compressorReleaseSlider,
+    filterTypeSelect,
   ].forEach((control) => {
     if (control) {
       control.addEventListener("change", updateEffectsChain)
@@ -854,13 +1118,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
+  // Patch Management Event Listeners
+  savePatchButton?.addEventListener('click', savePatch)
+
+  // Step Sequencer Event Listeners
+  document.getElementById('playSequencer')?.addEventListener('click', () => {
+    if (sequencer.isPlaying) {
+      stopSequencer()
+      document.getElementById('playSequencer').textContent = 'Play'
+    } else {
+      startSequencer()
+      document.getElementById('playSequencer').textContent = 'Stop'
+    }
+  })
+
+  document.getElementById('sequencerTarget')?.addEventListener('change', (e) => {
+    sequencer.target = e.target.value
+  })
+
+  // Envelope Follower Event Listeners
+  document.getElementById('envFollowSensitivity')?.addEventListener('input', (e) => {
+    envelopeFollower.sensitivity = Number.parseFloat(e.target.value)
+  })
+
+  document.getElementById('envFollowTarget')?.addEventListener('change', (e) => {
+    envelopeFollower.target = e.target.value
+  })
+
   resetButton?.addEventListener("click", resetToDefaultValues)
+
+  // Initialize tutorial after ensuring SynthTutorial is available
+  const tutorial = new SynthTutorial()
+  document.getElementById("startTutorial")?.addEventListener("click", () => {
+    tutorial.start()
+  })
+
+  try {
+    const keyboardDiv = document.getElementById("keyboard")
+    if (!keyboardDiv) {
+      throw new Error("Keyboard div not found")
+    }
+    console.log("Keyboard div found")
+  } catch (error) {
+    console.error("Failed to find keyboard div:", error)
+    const errorDiv = document.getElementById("keyboard-error")
+    if (errorDiv) {
+      errorDiv.style.display = "block"
+    }
+  }
 
   // Initialize components
   initAudioContext()
   initializeKeyboard()
   initializeStepSequencer()
   setupValueDisplays()
+  updatePatchList()
 
   console.log("JackSynth initialized successfully")
 })

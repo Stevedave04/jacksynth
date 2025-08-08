@@ -229,6 +229,7 @@ export class DrumMachine {
 
   clear() {
     this.pattern = Array(4).fill().map(() => Array(16).fill(false));
+    this.stop();
     this.updateGrid();
   }
 
