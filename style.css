@@ -751,6 +751,14 @@ canvas {
   .hint {
     font-size: 0.7em;
   }
+
+/* Panic button styling */
+.panic-info {
+  margin-top: 10px;
+  font-size: 0.8em;
+  color: #bdc3c7;
+  font-style: italic;
+}
   .effects-controls {
     grid-template-columns: 1fr;
   }
