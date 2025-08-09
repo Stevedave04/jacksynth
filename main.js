@@ -5,6 +5,35 @@ import { DrumMachine } from './drumMachine.js';
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM fully loaded and parsed")
 
+  // Theme toggle functionality
+  const themeToggle = document.getElementById('themeToggle')
+  const themeIcon = themeToggle.querySelector('.theme-icon')
+  const themeText = themeToggle.querySelector('.theme-text')
+  
+  // Check for saved theme preference or default to dark
+  const savedTheme = localStorage.getItem('theme') || 'dark'
+  document.documentElement.setAttribute('data-theme', savedTheme)
+  updateThemeToggle(savedTheme)
+  
+  function updateThemeToggle(theme) {
+    if (theme === 'light') {
+      themeIcon.textContent = '☀️'
+      themeText.textContent = 'Light'
+    } else {
+      themeIcon.textContent = '🌙'
+      themeText.textContent = 'Dark'
+    }
+  }
+  
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
+    
+    document.documentElement.setAttribute('data-theme', newTheme)
+    localStorage.setItem('theme', newTheme)
+    updateThemeToggle(newTheme)
+  })
+
   let audioContext
   let masterCompressor
   let mediaRecorder
