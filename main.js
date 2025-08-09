@@ -614,8 +614,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activeOscillators[note]) {
       console.log(`Cleaning up existing note ${note}`)
       stopNote(note)
-      // Wait a tiny bit for cleanup
-      return setTimeout(() => startNote(note, frequencyOverride), 1)
     }
 
     const frequency = frequencyOverride || noteFrequencies[note]
@@ -683,6 +681,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const { osc1, osc2, adsrGain } = oscillatorData
     const releaseTime = Number.parseFloat(releaseSlider.value)
 
+    // Immediately remove from active oscillators to prevent re-triggering
+    delete activeOscillators[note]
+    
+    // Clean up tracking sets immediately
+    activeKeyboardNotes.delete(note)
+    activeMouseNotes.delete(note)
     adsrGain.gain.cancelScheduledValues(audioContext.currentTime)
     adsrGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + releaseTime)
 
@@ -697,12 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (e) {
         // Ignore disconnection errors
       }
-      delete activeOscillators[note]
     }, releaseTime * 1000)
-    
-    // Clean up tracking sets
-    activeKeyboardNotes.delete(note)
-    activeMouseNotes.delete(note)
   }
 
   function stopAllNotes() {
