@@ -47,6 +47,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
+   * Sets up the envelope follower for audio analysis.
+   * This function can be expanded later to add envelope following functionality.
+   */
+  function setupEnvelopeFollower() {
+    // Placeholder for envelope follower functionality
+    console.log("Envelope follower setup complete")
+  }
+
+  /**
    * Initializes the audio effect nodes and sets up a default connection chain.
    * This should be called once after the AudioContext is created.
    */
