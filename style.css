@@ -66,30 +66,34 @@ body {
   box-shadow: var(--shadow-glow), 0 8px 32px rgba(0, 0, 0, 0.3);
   border: var(--glass-border);
   text-align: center;
-  max-width: 95%;
-  width: 1200px;
-  max-height: 90vh;
+  max-width: 90%;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 95vh;
   overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
+  margin: 20px auto;
 }
 
 /* Theme Toggle */
 .theme-toggle {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 15px;
+  right: 15px;
   background: var(--bg-glass);
   border: var(--glass-border);
   border-radius: 50px;
-  padding: 8px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-secondary);
+  z-index: 1000;
 }
 
 .theme-toggle:hover {
@@ -105,11 +109,12 @@ body {
 }
 
 h1 {
-  margin-top: 0;
+  margin: 0 0 20px 0;
+  padding-top: 10px;
   color: var(--text-primary);
   font-weight: 600;
   letter-spacing: 3px;
-  font-size: 2.5em;
+  font-size: 2.2em;
   text-shadow: 0 0 20px var(--accent-primary);
   background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
@@ -121,27 +126,31 @@ h1 {
 .tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   background: var(--bg-glass);
   border-radius: 15px;
   padding: 8px;
   backdrop-filter: blur(10px);
   border: var(--glass-border);
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .tab-button {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  padding: 12px 24px;
+  padding: 10px 20px;
   cursor: pointer;
-  font-size: 1em;
+  font-size: 0.9em;
   font-weight: 500;
   transition: all 0.3s ease;
   position: relative;
   border-radius: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  flex: 1;
+  min-width: 120px;
 }
 
 .tab-button:hover {
@@ -201,10 +210,10 @@ h1 {
 /* Synth Controls */
 .synth-controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-  padding: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 20px;
   background: var(--bg-glass);
   border-radius: 15px;
   backdrop-filter: blur(15px);
@@ -215,8 +224,8 @@ h1 {
 .control-group {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 15px;
+  gap: 10px;
+  padding: 12px;
   background: var(--bg-glass);
   border-radius: 10px;
   border: var(--glass-border);
@@ -233,8 +242,9 @@ h1 {
   font-size: 0.9em;
   color: var(--text-secondary);
   font-weight: 500;
-  min-width: 120px;
+  min-width: 100px;
   text-align: left;
+  flex-shrink: 0;
 }
 
 .control-group select,
@@ -242,7 +252,7 @@ h1 {
   background: var(--bg-glass);
   border: var(--border-color);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -265,17 +275,19 @@ h1 {
   height: 8px;
   appearance: none;
   -webkit-appearance: none;
-  width: 120px;
+  width: 100px;
   background: transparent;
+  flex-shrink: 0;
 }
 
 .value-display {
-  min-width: 50px;
+  min-width: 45px;
   text-align: center;
-  font-size: 0.9em;
+  font-size: 0.8em;
   color: var(--accent-primary);
   font-weight: 600;
   text-shadow: 0 0 10px var(--accent-primary);
+  flex-shrink: 0;
 }
 
 /* Range input styling */
@@ -327,12 +339,14 @@ h1 {
 }
 
 .control-group.adsr {
-  gap: 8px;
+  gap: 6px;
   background: var(--bg-glass);
-  padding: 15px;
+  padding: 12px;
   border-radius: 12px;
   border: 1px solid var(--accent-primary);
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+  flex-wrap: wrap;
+  justify-content: space-around;
 }
 
 .control-group.adsr > div {
@@ -340,6 +354,7 @@ h1 {
   flex-direction: column;
   align-items: center;
   gap: 5px;
+  min-width: 60px;
 }
 
 .control-group.adsr label {
@@ -350,21 +365,21 @@ h1 {
 }
 
 .control-group.adsr input[type="range"] {
-  width: 60px;
+  width: 55px;
 }
 
 /* Effects Controls */
 .effects-controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .effect-section {
   background: var(--bg-glass);
   border-radius: 15px;
-  padding: 20px;
+  padding: 15px;
   border: var(--glass-border);
   backdrop-filter: blur(15px);
   transition: all 0.3s ease;
@@ -398,12 +413,12 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .effect-header h3 {
   margin: 0;
-  font-size: 1.2em;
+  font-size: 1.1em;
   font-weight: 600;
   color: var(--text-primary);
   text-transform: uppercase;
@@ -414,8 +429,9 @@ h1 {
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 30px;
+  width: 50px;
+  height: 25px;
+  flex-shrink: 0;
 }
 
 .switch input {
@@ -440,10 +456,10 @@ h1 {
 .slider:before {
   position: absolute;
   content: "";
-  height: 22px;
-  width: 22px;
-  left: 4px;
-  bottom: 4px;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
   background: var(--text-secondary);
   transition: 0.4s;
   border-radius: 50%;
@@ -456,7 +472,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(30px);
+  transform: translateX(25px);
   background: white;
   box-shadow: 0 0 10px var(--accent-primary);
 }
@@ -465,8 +481,8 @@ input:checked + .slider:before {
 .drum-machine-controls {
   background: var(--bg-glass);
   border-radius: 15px;
-  padding: 25px;
-  margin-bottom: 30px;
+  padding: 20px;
+  margin-bottom: 20px;
   backdrop-filter: blur(15px);
   border: var(--glass-border);
   box-shadow: var(--shadow-glow);
@@ -475,29 +491,34 @@ input:checked + .slider:before {
 .drum-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 25px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .drum-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .drum-row-label {
-  min-width: 100px;
+  min-width: 80px;
+  width: 80px;
   font-weight: 700;
   color: var(--text-primary);
   text-align: left;
-  font-size: 1em;
+  font-size: 0.9em;
   text-transform: uppercase;
   letter-spacing: 1px;
+  flex-shrink: 0;
 }
 
 .drum-pad {
-  width: 45px;
-  height: 45px;
+  width: 35px;
+  height: 35px;
+  min-width: 35px;
   background: var(--bg-glass);
   border: 2px solid var(--border-color);
   border-radius: 8px;
@@ -505,6 +526,7 @@ input:checked + .slider:before {
   transition: all 0.2s ease;
   position: relative;
   backdrop-filter: blur(10px);
+  flex-shrink: 0;
 }
 
 .drum-pad:hover {
@@ -536,13 +558,14 @@ input:checked + .slider:before {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-top: 25px;
-  padding: 20px;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 15px;
   background: var(--bg-glass);
   border-radius: 12px;
   border: var(--glass-border);
   backdrop-filter: blur(10px);
+  flex-wrap: wrap;
 }
 
 .drum-controls button {
@@ -575,17 +598,18 @@ input:checked + .slider:before {
 #keyboard {
   position: relative;
   width: 100%;
-  height: 280px;
+  height: 220px;
   background: var(--bg-glass);
   border-radius: 15px;
   padding: 10px;
   box-sizing: border-box;
   overflow-x: auto;
+  overflow-y: hidden;
   white-space: nowrap;
   backdrop-filter: blur(15px);
   border: var(--glass-border);
   box-shadow: var(--shadow-glow);
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .white-keys {
@@ -606,8 +630,8 @@ input:checked + .slider:before {
 }
 
 .white-key {
-  width: 50px;
-  min-width: 50px;
+  width: 45px;
+  min-width: 45px;
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
   border-radius: 0 0 8px 8px;
@@ -619,7 +643,7 @@ input:checked + .slider:before {
 }
 
 .black-key {
-  width: 35px;
+  width: 30px;
   position: absolute;
   height: 65%;
   background: var(--bg-primary);
@@ -627,7 +651,7 @@ input:checked + .slider:before {
   border-radius: 0 0 6px 6px;
   pointer-events: auto;
   top: 0;
-  margin-left: -17.5px;
+  margin-left: -15px;
   z-index: 3;
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
@@ -636,11 +660,11 @@ input:checked + .slider:before {
 
 .key-label {
   position: absolute;
-  bottom: 8px;
+  bottom: 5px;
   left: 0;
   right: 0;
   text-align: center;
-  font-size: 11px;
+  font-size: 9px;
   pointer-events: none;
   white-space: pre-line;
   font-weight: 600;
@@ -682,13 +706,13 @@ input:checked + .slider:before {
 
 /* Visualization */
 .visualization-container {
-  margin: 30px 0;
+  margin: 20px 0;
   background: var(--bg-glass);
   border-radius: 15px;
-  padding: 20px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   backdrop-filter: blur(15px);
   border: var(--glass-border);
   box-shadow: var(--shadow-glow);
@@ -696,7 +720,7 @@ input:checked + .slider:before {
 
 canvas {
   width: 100%;
-  height: 180px;
+  height: 120px;
   background: var(--bg-primary);
   border-radius: 10px;
   border: var(--glass-border);
@@ -704,8 +728,9 @@ canvas {
 
 .viz-controls {
   display: flex;
-  gap: 15px;
+  gap: 10px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .viz-controls button,
@@ -713,7 +738,7 @@ canvas {
   background: var(--bg-glass);
   border: var(--border-color);
   border-radius: 8px;
-  padding: 10px 16px;
+  padding: 8px 12px;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -730,11 +755,12 @@ canvas {
 
 /* Recording Controls */
 .recording-controls {
-  margin: 30px 0;
+  margin: 20px 0;
   display: flex;
-  gap: 15px;
+  gap: 10px;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .record-btn {
@@ -742,11 +768,11 @@ canvas {
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 12px 20px;
+  padding: 10px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -788,9 +814,9 @@ canvas {
 /* Hint text */
 .hint {
   color: var(--text-secondary);
-  font-size: 0.9em;
-  margin-top: 20px;
-  padding: 15px;
+  font-size: 0.8em;
+  margin-top: 15px;
+  padding: 12px;
   background: var(--bg-glass);
   border-radius: 10px;
   border: var(--glass-border);
@@ -821,31 +847,35 @@ canvas {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   #app {
-    padding: 20px;
-    margin: 10px;
+    padding: 15px;
+    margin: 10px auto;
     width: calc(100% - 20px);
+    max-height: 98vh;
   }
   
   .theme-toggle {
-    top: 10px;
-    right: 10px;
-    font-size: 12px;
+    top: 8px;
+    right: 8px;
+    font-size: 10px;
+    padding: 4px 8px;
   }
   
   h1 {
-    font-size: 2em;
+    font-size: 1.8em;
+    margin-bottom: 15px;
   }
   
   .synth-controls {
     grid-template-columns: 1fr;
-    gap: 15px;
-    padding: 20px;
+    gap: 10px;
+    padding: 15px;
   }
   
   .control-group {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+    gap: 6px;
+    padding: 10px;
   }
   
   .control-group label {
@@ -854,16 +884,18 @@ canvas {
   }
   
   .control-group input[type="range"] {
-    width: 100%;
+    width: 90%;
+    margin: 0 auto;
   }
   
   .control-group.adsr {
     flex-direction: row;
     justify-content: space-around;
+    flex-wrap: wrap;
   }
   
   .control-group.adsr input[type="range"] {
-    width: 80px;
+    width: 60px;
   }
   
   .effects-controls {
@@ -871,53 +903,20 @@ canvas {
   }
   
   .drum-pad {
-    width: 35px;
-    height: 35px;
-  }
-  
-  .drum-row-label {
-    min-width: 70px;
-    font-size: 0.9em;
-  }
-  
-  .drum-controls {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  #keyboard {
-    height: 200px;
-  }
-  
-  .white-key {
-    width: 40px;
-    min-width: 40px;
-  }
-  
-  .black-key {
     width: 28px;
-    margin-left: -14px;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.8em;
-    letter-spacing: 2px;
-  }
-  
-  .hint {
-    font-size: 0.8em;
-  }
-  
-  .drum-pad {
-    width: 30px;
-    height: 30px;
+    height: 28px;
+    min-width: 28px;
   }
   
   .drum-row-label {
     min-width: 60px;
+    width: 60px;
     font-size: 0.8em;
+  }
+  
+  .drum-controls {
+    flex-direction: column;
+    gap: 10px;
   }
   
   #keyboard {
@@ -933,15 +932,93 @@ canvas {
     width: 24px;
     margin-left: -12px;
   }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 5px;
+  }
+  
+  #app {
+    padding: 10px;
+    margin: 5px auto;
+    width: calc(100% - 10px);
+    border-radius: 15px;
+  }
+  
+  h1 {
+    font-size: 1.6em;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  
+  .hint {
+    font-size: 0.7em;
+    padding: 8px;
+  }
+  
+  .drum-pad {
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+  }
+  
+  .drum-row-label {
+    min-width: 50px;
+    width: 50px;
+    font-size: 0.7em;
+  }
+  
+  #keyboard {
+    height: 140px;
+  }
+  
+  .white-key {
+    width: 30px;
+    min-width: 30px;
+  }
+  
+  .black-key {
+    width: 20px;
+    margin-left: -10px;
+  }
   
   .tabs {
     flex-direction: column;
     gap: 5px;
+    padding: 5px;
   }
   
   .tab-button {
-    padding: 10px 16px;
-    font-size: 0.9em;
+    padding: 8px 12px;
+    font-size: 0.8em;
+    min-width: auto;
+  }
+  
+  .synth-controls {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .control-group {
+    padding: 8px;
+  }
+  
+  .control-group label {
+    font-size: 0.8em;
+  }
+  
+  .value-display {
+    font-size: 0.7em;
+    min-width: 35px;
+  }
+  
+  .effect-section {
+    padding: 10px;
+  }
+  
+  .effect-header h3 {
+    font-size: 1em;
   }
 }
 
@@ -972,3 +1049,42 @@ canvas {
 h1 {
   animation: neonGlow 3s ease-in-out infinite;
 }
+
+/* Ensure no horizontal overflow */
+* {
+  max-width: 100%;
+}
+
+.control-group {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.drum-row {
+  min-width: 0;
+}
+
+/* Fix keyboard positioning for black keys */
+[data-note$="C#"] { left: 30px; }
+[data-note$="D#"] { left: 75px; }
+[data-note$="F#"] { left: 165px; }
+[data-note$="G#"] { left: 210px; }
+[data-note$="A#"] { left: 255px; }
+
+[data-note$="C#3"] { left: 30px; }
+[data-note$="D#3"] { left: 75px; }
+[data-note$="F#3"] { left: 165px; }
+[data-note$="G#3"] { left: 210px; }
+[data-note$="A#3"] { left: 255px; }
+
+[data-note$="C#4"] { left: 345px; }
+[data-note$="D#4"] { left: 390px; }
+[data-note$="F#4"] { left: 480px; }
+[data-note$="G#4"] { left: 525px; }
+[data-note$="A#4"] { left: 570px; }
+
+[data-note$="C#5"] { left: 660px; }
+[data-note$="D#5"] { left: 705px; }
+[data-note$="F#5"] { left: 795px; }
+[data-note$="G#5"] { left: 840px; }
+[data-note$="A#5"] { left: 885px; }
