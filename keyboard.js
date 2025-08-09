@@ -75,11 +75,17 @@ export function createKeyboard(options) {
   // Track active notes and mouse state
   const activeNotes = new Set()
   let isMouseDown = false
+  let draggedNote = null
 
   // Add mouse down/up listeners to the keyboard div
-  keyboardDiv.addEventListener('mousedown', () => isMouseDown = true)
-  keyboardDiv.addEventListener('mouseup', () => {
+  keyboardDiv.addEventListener('mousedown', (e) => {
+    isMouseDown = true
+    e.preventDefault() // Prevent text selection
+  })
+  
+  keyboardDiv.addEventListener('mouseup', (e) => {
     isMouseDown = false
+    draggedNote = null
     // Clean up any stuck notes
     activeNotes.forEach(note => {
       stopNote(note)
@@ -88,10 +94,26 @@ export function createKeyboard(options) {
     })
     activeNotes.clear()
   })
-  keyboardDiv.addEventListener('mouseleave', () => {
+  
+  keyboardDiv.addEventListener('mouseleave', (e) => {
     if (isMouseDown) {
       isMouseDown = false
+      draggedNote = null
       // Clean up any stuck notes
+      activeNotes.forEach(note => {
+        stopNote(note)
+        const key = document.querySelector(`[data-note="${note}"]`)
+        if (key) key.classList.remove('active')
+      })
+      activeNotes.clear()
+    }
+  })
+  
+  // Add global mouse up listener to catch mouse releases outside the keyboard
+  document.addEventListener('mouseup', () => {
+    if (isMouseDown) {
+      isMouseDown = false
+      draggedNote = null
       activeNotes.forEach(note => {
         stopNote(note)
         const key = document.querySelector(`[data-note="${note}"]`)
@@ -116,16 +138,20 @@ export function createKeyboard(options) {
       key.appendChild(label)
 
       key.addEventListener("mousedown", () => {
+        if (activeNotes.has(noteName)) return // Prevent double-triggering
         initAudioContext()
         startNote(noteName)
         key.classList.add("active")
         activeNotes.add(noteName)
+        draggedNote = noteName
       })
 
       key.addEventListener("mouseup", () => {
-        stopNote(noteName)
-        key.classList.remove("active")
-        activeNotes.delete(noteName)
+        if (activeNotes.has(noteName)) {
+          stopNote(noteName)
+          key.classList.remove("active")
+          activeNotes.delete(noteName)
+        }
       })
 
       key.addEventListener("mouseleave", () => {
@@ -137,11 +163,19 @@ export function createKeyboard(options) {
       })
 
       key.addEventListener("mouseenter", () => {
-        if (isMouseDown) {
+        if (isMouseDown && !activeNotes.has(noteName)) {
           initAudioContext()
           startNote(noteName)
           key.classList.add("active")
           activeNotes.add(noteName)
+          // Stop the previously dragged note if different
+          if (draggedNote && draggedNote !== noteName && activeNotes.has(draggedNote)) {
+            stopNote(draggedNote)
+            const prevKey = document.querySelector(`[data-note="${draggedNote}"]`)
+            if (prevKey) prevKey.classList.remove('active')
+            activeNotes.delete(draggedNote)
+          }
+          draggedNote = noteName
         }
       })
 
@@ -165,16 +199,20 @@ export function createKeyboard(options) {
         key.appendChild(label)
 
         key.addEventListener("mousedown", () => {
+          if (activeNotes.has(noteName)) return // Prevent double-triggering
           initAudioContext()
           startNote(noteName)
           key.classList.add("active")
           activeNotes.add(noteName)
+          draggedNote = noteName
         })
 
         key.addEventListener("mouseup", () => {
-          stopNote(noteName)
-          key.classList.remove("active")
-          activeNotes.delete(noteName)
+          if (activeNotes.has(noteName)) {
+            stopNote(noteName)
+            key.classList.remove("active")
+            activeNotes.delete(noteName)
+          }
         })
 
         key.addEventListener("mouseleave", () => {
@@ -186,11 +224,19 @@ export function createKeyboard(options) {
         })
 
         key.addEventListener("mouseenter", () => {
-          if (isMouseDown) {
+          if (isMouseDown && !activeNotes.has(noteName)) {
             initAudioContext()
             startNote(noteName)
             key.classList.add("active")
             activeNotes.add(noteName)
+            // Stop the previously dragged note if different
+            if (draggedNote && draggedNote !== noteName && activeNotes.has(draggedNote)) {
+              stopNote(draggedNote)
+              const prevKey = document.querySelector(`[data-note="${draggedNote}"]`)
+              if (prevKey) prevKey.classList.remove('active')
+              activeNotes.delete(draggedNote)
+            }
+            draggedNote = noteName
           }
         })
 

@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Track active keyboard notes
   const activeKeyboardNotes = new Set()
+  const activeMouseNotes = new Set()
 
   // Effect Nodes (declared globally)
   const effectsChain = {} // To hold references to nodes in the chain
@@ -645,6 +646,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       delete activeOscillators[note]
     }, releaseTime * 1000)
+    
+    // Clean up tracking sets
+    activeKeyboardNotes.delete(note)
+    activeMouseNotes.delete(note)
+  }
+
+  function stopAllNotes() {
+    // Stop all active oscillators
+    Object.keys(activeOscillators).forEach(note => {
+      stopNote(note)
+    })
+    
+    // Clear all tracking sets
+    activeKeyboardNotes.clear()
+    activeMouseNotes.clear()
+    
+    // Remove visual feedback from all keys
+    document.querySelectorAll('.white-key, .black-key').forEach(key => {
+      key.classList.remove('active')
+    })
   }
 
   function updateNoteFrequencies() {
@@ -1015,6 +1036,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Event Listeners
   document.addEventListener("keydown", (event) => {
+    // Prevent default for keys we handle to avoid browser shortcuts
+    if (keyNoteMap[event.key]) {
+      event.preventDefault()
+    }
+    
     const note = keyNoteMap[event.key]
     if (note && !event.repeat) {
       if (arpEnabledToggle.checked) {
@@ -1039,7 +1065,6 @@ document.addEventListener("DOMContentLoaded", () => {
         handleArpeggiatorNote(note, false)
       } else {
         stopNote(note)
-        activeKeyboardNotes.delete(note)
         // Update visual feedback
         const key = document.querySelector(`[data-note="${note}"]`)
         if (key) key.classList.remove('active')
@@ -1047,15 +1072,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Add blur event listener to handle cases when window loses focus
+  // Add event listeners to handle cases when window loses focus or visibility
   window.addEventListener('blur', () => {
-    // Stop all active notes
-    activeKeyboardNotes.forEach(note => {
-      stopNote(note)
-      const key = document.querySelector(`[data-note="${note}"]`)
-      if (key) key.classList.remove('active')
-    })
-    activeKeyboardNotes.clear()
+    stopAllNotes()
+  })
+  
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopAllNotes()
+    }
+  })
+  
+  // Add panic button functionality
+  document.addEventListener('keydown', (event) => {
+    // Escape key acts as panic button
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      stopAllNotes()
+      console.log('Panic button activated - all notes stopped')
+    }
   })
 
   // Recording Controls
