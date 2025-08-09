@@ -18,6 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const effectsChain = {} // To hold references to nodes in the chain
 
   /**
+   * Sets up the envelope follower for audio analysis.
+   * This function can be expanded later to add envelope following functionality.
+   */
+  function setupEnvelopeFollower() {
+    // Placeholder for envelope follower functionality
+    console.log("Envelope follower setup complete")
+  }
+
+  /**
    * Initializes the audio context and sets up the master compressor.
    * This should be called only once.
    */
@@ -44,15 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     return audioContext
-  }
-
-  /**
-   * Sets up the envelope follower for audio analysis.
-   * This function can be expanded later to add envelope following functionality.
-   */
-  function setupEnvelopeFollower() {
-    // Placeholder for envelope follower functionality
-    console.log("Envelope follower setup complete")
   }
 
   /**
