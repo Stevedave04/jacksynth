@@ -496,7 +496,6 @@ canvas {
 .record-btn:disabled {
   background: #95a5a6;
   cursor: not-allowed;
-  pointer-events: none;
 }
 
 #recordButton.recording {
@@ -514,6 +513,13 @@ canvas {
   100% {
     opacity: 1;
   }
+}
+
+.recording-status {
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #bdc3c7;
+  text-align: center;
 }
 
 /* Step Sequencer */

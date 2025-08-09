@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let drumMachine
   let lfoOscillator = null
   let lfoGain = null
+  let recordingDestination = null
+  let isRecording = false
 
   // Track active keyboard notes
   const activeKeyboardNotes = new Set()
@@ -76,6 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Initialize visualizer
       const visualizer = new Visualizer(audioContext, masterCompressor)
+
+      // Initialize recording setup
+      initRecording()
 
       // Setup effects chain
       setupEffectsChain()
@@ -337,22 +342,70 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initRecording() {
-    const dest = audioContext.createMediaStreamDestination()
-    masterCompressor.connect(dest)
-    mediaRecorder = new MediaRecorder(dest.stream)
+    if (!audioContext) {
+      console.error("AudioContext not initialized for recording")
+      return
+    }
+
+    // Create a dedicated destination for recording
+    recordingDestination = audioContext.createMediaStreamDestination()
+    
+    // Connect master compressor to both the main output and recording destination
+    masterCompressor.connect(recordingDestination)
+    
+    // Initialize MediaRecorder with better settings
+    const options = {
+      mimeType: 'audio/webm;codecs=opus',
+      audioBitsPerSecond: 128000
+    }
+    
+    // Fallback for browsers that don't support webm
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      options.mimeType = 'audio/wav'
+    }
+    
+    try {
+      mediaRecorder = new MediaRecorder(recordingDestination.stream, options)
+    } catch (e) {
+      // Fallback without options
+      mediaRecorder = new MediaRecorder(recordingDestination.stream)
+    }
 
     mediaRecorder.ondataavailable = (e) => {
-      audioChunks.push(e.data)
+      if (e.data.size > 0) {
+        audioChunks.push(e.data)
+        console.log('Audio chunk recorded:', e.data.size, 'bytes')
+      }
     }
 
     mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunks, { type: "audio/wav" })
+      console.log('Recording stopped, chunks:', audioChunks.length)
+      
+      if (audioChunks.length === 0) {
+        alert('No audio was recorded. Make sure to play some notes while recording.')
+        return
+      }
+      
+      const mimeType = mediaRecorder.mimeType || 'audio/webm'
+      const audioBlob = new Blob(audioChunks, { type: mimeType })
+      console.log('Created blob:', audioBlob.size, 'bytes')
+      
       const audioUrl = URL.createObjectURL(audioBlob)
       const downloadButton = document.getElementById("downloadButton")
       downloadButton.href = audioUrl
-      downloadButton.download = "recording.wav"
+      downloadButton.download = `jacksynth-recording-${Date.now()}.${mimeType.includes('webm') ? 'webm' : 'wav'}`
       downloadButton.disabled = false
+      downloadButton.textContent = 'Download Recording'
+      
+      document.getElementById("recordingStatus").textContent = 'Recording ready for download'
     }
+    
+    mediaRecorder.onerror = (e) => {
+      console.error('MediaRecorder error:', e)
+      document.getElementById("recordingStatus").textContent = 'Recording error occurred'
+    }
+    
+    console.log('Recording initialized with MIME type:', mediaRecorder.mimeType)
   }
 
   // DOM Elements - Synth Controls
@@ -1095,18 +1148,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Recording Controls
   document.getElementById("recordButton")?.addEventListener("click", () => {
+    console.log('Record button clicked')
     if (!audioContext) initAudioContext()
     if (!mediaRecorder) initRecording()
 
+    if (isRecording) {
+      console.log('Already recording, ignoring click')
+      return
+    }
+
     audioChunks = []
-    mediaRecorder.start()
+    isRecording = true
+    
+    try {
+      mediaRecorder.start(100) // Record in 100ms chunks
+      console.log('Recording started')
+      document.getElementById("recordingStatus").textContent = 'Recording... Play some notes!'
+    } catch (e) {
+      console.error('Failed to start recording:', e)
+      isRecording = false
+      return
+    }
+    
     document.getElementById("recordButton").classList.add("recording")
     document.getElementById("recordButton").disabled = true
     document.getElementById("stopButton").disabled = false
+    document.getElementById("downloadButton").disabled = true
+    document.getElementById("downloadButton").textContent = 'Download'
   })
 
   document.getElementById("stopButton")?.addEventListener("click", () => {
-    mediaRecorder.stop()
+    console.log('Stop button clicked')
+    
+    if (!isRecording) {
+      console.log('Not recording, ignoring click')
+      return
+    }
+    
+    try {
+      mediaRecorder.stop()
+      console.log('Recording stopped')
+      document.getElementById("recordingStatus").textContent = 'Processing recording...'
+    } catch (e) {
+      console.error('Failed to stop recording:', e)
+    }
+    
+    isRecording = false
     document.getElementById("recordButton").classList.remove("recording")
     document.getElementById("recordButton").disabled = false
     document.getElementById("stopButton").disabled = true
